@@ -1,0 +1,27 @@
+# log the function call and arguments
+def dump_args(func):
+    """Decorator to print function call details - parameters names and effective values"""
+
+    def wrapper(*func_args, **func_kwargs):
+        logger = logging.getLogger("langchain")
+        arg_names = func.__code__.co_varnames[: func.__code__.co_argcount]
+        args = func_args[: len(arg_names)]
+        defaults = func.__defaults__ or ()
+        args = (
+            args + defaults[len(defaults) - (func.__code__.co_argcount - len(args)) :]
+        )
+        params = list(zip(arg_names, args))
+        args = func_args[len(arg_names) :]
+        params.append(("session_id", func_args[0].session_id))
+        params.append(("req_msg_id", func_args[0].req_msg_id))
+        if args:
+            params.append(("args", args))
+        if func_kwargs:
+            params.append(("kwargs", func_kwargs))
+        logger.info("trace: %s", traceback.format_stack(limit=5))
+        logger.info(
+            func.__name__ + " (" + ", ".join("%s = %r" % p for p in params) + " )"
+        )
+        return func(*func_args, **func_kwargs)
+
+    return wrapper
