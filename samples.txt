@@ -25,3 +25,20 @@ def dump_args(func):
         return func(*func_args, **func_kwargs)
 
     return wrapper
+
+def add_file_handler():
+    """
+    Add file handler to the logger
+    """
+    global FILE_HANDLER_ADDED
+    if FILE_HANDLER_ADDED:
+        return
+    logs_dir = str(Path.home()) + "/logs"
+    Path(logs_dir).mkdir(parents=True, exist_ok=True)
+    logger = logging.getLogger("langchain")
+    filename = logs_dir + "/backchatty.log"
+    file_handler = logging.FileHandler(filename)
+    file_handler.setLevel(logging.DEBUG)
+    log_formatter = logging.Formatter(LOGGING_CONFIG["formatters"]["info"]["format"])
+    file_handler.setFormatter(log_formatter)
+    logger.addHandler(file_handler)
