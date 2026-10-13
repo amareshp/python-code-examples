@@ -1,8 +1,9 @@
-"""Behavioral tests for maximum profit, product except self, and max area."""
+"""Behavioral tests for the linear-scan array examples."""
 
 import pytest
 
 from dsa.linear_examples import (
+    first_missing_positive,
     max_area,
     max_profits,
     product_of_array_except_self,
@@ -100,3 +101,50 @@ def test_max_area_rejects_negative_heights(heights):
     """Check that a ValueError is raised for any negative line height."""
     with pytest.raises(ValueError):
         max_area(heights)
+
+
+@pytest.mark.parametrize(
+    "numbers,expected",
+    [([3, 4, -1, 1], 2), ([7, 8, 9, 11, 12], 1), ([1, 2, 0], 3),
+     ([2, 3, 4], 1), ([5, 1, 3, 2], 4)],
+)
+def test_first_missing_positive_finds_smallest_absent_value(numbers, expected):
+    """Check gaps at the start, middle, and among out-of-range values."""
+    assert first_missing_positive(numbers) == expected
+
+
+@pytest.mark.parametrize(
+    "numbers,expected",
+    [([1], 2), ([2, 1], 3), ([1, 2, 3], 4), ([4, 3, 2, 1, 5], 6)],
+)
+def test_first_missing_positive_returns_next_after_full_range(numbers, expected):
+    """Check that len(nums) + 1 is returned when 1..len(nums) are present."""
+    assert first_missing_positive(numbers) == expected
+
+
+@pytest.mark.parametrize(
+    "numbers,expected",
+    [([1, 1], 2), ([2, 2], 1), ([3, 3, 1], 2), ([1, 1, 2, 2], 3),
+     ([7, 7, 7], 1)],
+)
+def test_first_missing_positive_handles_duplicates(numbers, expected):
+    """Check that repeated values terminate and do not count as extra values."""
+    assert first_missing_positive(numbers) == expected
+
+
+@pytest.mark.parametrize(
+    "numbers", [[], [0], [-1], [0, 0], [-3, -2, -1], [-1, 0, 2]],
+)
+def test_first_missing_positive_returns_one_without_one(numbers):
+    """Check empty, zero, and negative inputs where 1 is missing."""
+    assert first_missing_positive(numbers) == 1
+
+
+@pytest.mark.parametrize(
+    "numbers", [[3, 4, -1, 1], [2, 2, 0, -5], [1, 2, 3]],
+)
+def test_first_missing_positive_keeps_same_elements(numbers):
+    """Check that in-place rearranging neither adds nor removes elements."""
+    original = sorted(numbers)
+    first_missing_positive(numbers)
+    assert sorted(numbers) == original

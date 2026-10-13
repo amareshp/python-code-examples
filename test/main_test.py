@@ -1,4 +1,4 @@
-"""Behavioral tests for the maximum-profit application entrypoint."""
+"""Behavioral tests for the first-missing-positive application entrypoint."""
 
 from pathlib import Path
 import subprocess
@@ -6,13 +6,16 @@ import sys
 
 from examples import main as app
 
+EXPECTED_OUTPUT = (
+    "Numbers: [3, 4, -1, 1]\nFirst missing positive: 2\n"
+    "Numbers: [1, 2, 3]\nFirst missing positive: 4\n"
+)
 
-def test_main_prints_sample_prices_and_profit(capsys):
+
+def test_main_prints_samples_and_results(capsys):
     """Capture stdout and check the complete sample output."""
     app.main()
-    assert capsys.readouterr().out == (
-        "Prices: [7, 1, 5, 3, 6, 4]\nMaximum profit: 5\n"
-    )
+    assert capsys.readouterr().out == EXPECTED_OUTPUT
 
 
 def test_main_returns_none(capsys):
@@ -20,25 +23,25 @@ def test_main_returns_none(capsys):
     assert app.main() is None
 
 
-def test_main_passes_chronological_sample_to_max_profits(monkeypatch, capsys):
-    """Record calls with a stub and verify one call with the sample prices."""
+def test_main_passes_both_samples_to_first_missing_positive(monkeypatch, capsys):
+    """Record calls with a stub and verify one call per sample, in order."""
     calls = []
 
-    def record_prices(prices):
-        """Record the supplied prices and return a constant stub profit."""
-        calls.append(prices.copy())
-        return 5
+    def record_numbers(numbers):
+        """Record the supplied numbers and return a constant stub result."""
+        calls.append(numbers.copy())
+        return 1
 
-    monkeypatch.setattr(app, "max_profits", record_prices)
+    monkeypatch.setattr(app, "first_missing_positive", record_numbers)
     app.main()
-    assert calls == [[7, 1, 5, 3, 6, 4]]
+    assert calls == [[3, 4, -1, 1], [1, 2, 3]]
 
 
-def test_main_prints_profit_returned_by_algorithm(monkeypatch, capsys):
-    """Substitute a distinct profit to ensure the printed result is computed."""
-    monkeypatch.setattr(app, "max_profits", lambda prices: 42)
+def test_main_prints_result_returned_by_algorithm(monkeypatch, capsys):
+    """Substitute a distinct result to ensure the printed value is computed."""
+    monkeypatch.setattr(app, "first_missing_positive", lambda numbers: 42)
     app.main()
-    assert "Maximum profit: 42\n" in capsys.readouterr().out
+    assert capsys.readouterr().out.count("First missing positive: 42\n") == 2
 
 
 def test_main_runs_as_module():
@@ -51,5 +54,5 @@ def test_main_runs_as_module():
         check=True,
         timeout=10,
     )
-    assert result.stdout == "Prices: [7, 1, 5, 3, 6, 4]\nMaximum profit: 5\n"
+    assert result.stdout == EXPECTED_OUTPUT
     assert result.stderr == ""
