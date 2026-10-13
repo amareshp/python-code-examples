@@ -77,3 +77,52 @@ def product_of_array_except_self(nums):
         result[i] *= right_product
         right_product *= nums[i]
     return result
+
+def max_area(height):
+    """Find the most water a container formed by two vertical lines can hold.
+
+    Args:
+        height: Sequence of nonnegative integers, where height[i] is the
+            height of a vertical line drawn from (i, 0) to (i, height[i]).
+            Assumes O(1) indexing and length access, as provided by a list
+            or tuple. The input is not modified.
+
+    Returns:
+        The largest value of min(height[i], height[j]) * (j - i) over all
+        index pairs i < j. Returns 0 when fewer than two lines are given,
+        or when every possible container has zero height or width.
+
+    Raises:
+        ValueError: If any height is negative.
+
+    Logic:
+        Reject negative heights first, since a line cannot extend below the
+        x-axis. Then place one pointer at each end of the sequence, giving
+        the widest container. At each step, record the area bounded by the
+        shorter of the two lines, then move the pointer at the shorter line
+        inward. Any other container using that shorter line would be
+        narrower and still limited by that line's height, so it cannot hold
+        more water and the line can be discarded. When the heights are
+        equal, neither line can do better with an inner partner, so moving
+        either pointer is safe. The scan stops when the pointers meet, after
+        every line has been discarded or paired once.
+
+    Complexity:
+        Runtime is O(n), where n = len(height): one pass validates the
+        heights and the pointers move toward each other at most n - 1 times,
+        assuming O(1) comparisons and arithmetic. Auxiliary space is O(1),
+        since only two indices and the best area are stored.
+    """
+    if any(h < 0 for h in height):
+        raise ValueError("heights must be nonnegative")
+    left = 0
+    right = len(height) - 1
+    max_water = 0
+    while left < right:
+        current_area = min(height[left], height[right]) * (right - left)
+        max_water = max(max_water, current_area)
+        if height[left] < height[right]:
+            left += 1
+        else:
+            right -= 1
+    return max_water
