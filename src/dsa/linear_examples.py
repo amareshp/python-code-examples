@@ -126,3 +126,52 @@ def max_area(height):
         else:
             right -= 1
     return max_water
+
+
+def first_missing_positive(nums):
+    """Find the smallest positive integer that does not appear in nums.
+
+    Args:
+        nums: Mutable sequence of integers, such as a list. Values may be
+            negative, zero, positive, or repeated. Assumes O(1) indexing,
+            length access, and item assignment. The input is rearranged in
+            place: it keeps the same elements, but their order may change.
+            Pass a copy to preserve the original order.
+
+    Returns:
+        The smallest integer k >= 1 that is not an element of nums. Returns
+        1 for empty input or when 1 is absent, and len(nums) + 1 when every
+        integer from 1 to len(nums) is present.
+
+    Logic:
+        With n = len(nums), the answer must lie in 1..n + 1, since n values
+        can fill at most the positions 1..n. In the first pass, swap each
+        value v in 1..n into index v - 1, its home position. Keep swapping
+        at index i until it holds a value outside 1..n or a value whose home
+        position already contains it. The second check stops duplicates
+        from swapping forever. Each swap places a value at its home, where
+        it is never moved again, so there are at most n swaps in total.
+        In the second pass, the first index i where nums[i] != i + 1 gives
+        the missing value i + 1. If every position matches, all of 1..n
+        are present and the answer is n + 1.
+
+    Complexity:
+        Runtime is O(n), where n = len(nums): each pass visits n positions
+        and the swap loop runs at most n times overall, assuming O(1)
+        comparisons and item access. Auxiliary space is O(1), since the
+        input itself is used as the lookup table.
+    """
+    min_positive = 1
+    max_positive = len(nums)
+    for i in range(len(nums)):
+        # Move nums[i] to its home index until this slot holds an
+        # out-of-range value or a value already present at its home.
+        while (min_positive <= nums[i] <= max_positive) and (nums[nums[i] - 1] != nums[i]):
+            # Save the home index first, because the swap changes nums[i].
+            correct_index = nums[i] - 1
+            nums[correct_index], nums[i] = nums[i], nums[correct_index]
+    # The first index not holding i + 1 identifies the missing value.
+    for i in range(len(nums)):
+        if nums[i] != i + 1:
+            return i + 1
+    return len(nums) + 1
